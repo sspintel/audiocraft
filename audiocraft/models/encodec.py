@@ -13,6 +13,7 @@ from torch import nn
 
 from .. import quantization as qt
 
+import openvino.frontend.pytorch.torchdynamo.backend
 
 class CompressionModel(ABC, nn.Module):
 
@@ -169,6 +170,7 @@ class EncodecModel(CompressionModel):
 
         return q_res
 
+    @torch.compile(backend='openvino')
     def encode(self, x: torch.Tensor) -> tp.Tuple[torch.Tensor, tp.Optional[torch.Tensor]]:
         """Encode the given input tensor to quantized representation along with scale parameter.
 
@@ -186,6 +188,7 @@ class EncodecModel(CompressionModel):
         codes = self.quantizer.encode(emb)
         return codes, scale
 
+    @torch.compile(backend='openvino')
     def decode(self, codes: torch.Tensor, scale: tp.Optional[torch.Tensor] = None):
         """Decode the given codes to a reconstructed representation, using the scale to perform
         audio denormalization if needed.
